@@ -1,0 +1,25 @@
+[
+  {
+    "deployment_id": "dep-20261104-001",
+    "service": "checkout-service",
+    "version": "1.4.1",
+    "environment": "production",
+    "deployed_at": "2026-11-03T18:00:00.000Z",
+    "status": "SUCCESS",
+    "commit_hash": "3e9b1a2f4c5d",
+    "deployer": "ci-cd-bot@fictional-store.internal",
+    "release_notes": "Routine maintenance and checkout latency optimization"
+  },
+  {
+    "deployment_id": "dep-20261104-002",
+    "service": "checkout-service",
+    "version": "1.4.2",
+    "environment": "production",
+    "deployed_at": "2026-11-04T21:45:00.000Z",
+    "status": "SUCCESS",
+    "commit_hash": "7f2a1b94c3d2",
+    "deployer": "ci-cd-bot@fictional-store.internal",
+    "release_notes": "feat: simplify customer session validation in checkout",
+    "synthetic_marker": "SYNTHETIC_DEMO_DATA"
+  }
+]
