@@ -35,8 +35,11 @@ public class PaymentValidator {
             throw new InvalidPaymentException("Payment method details must be provided");
         }
 
-        // Safe implementation supporting authenticated and guest checkouts:
-        UUID customerId = (customer != null) ? customer.getId() : null;
+        // Regression: removed null check assuming session customer is always populated
+        // Prior code: UUID customerId = (customer != null) ? customer.getId() : null;
+        // Trigger: Guest checkout payloads provide customer = null
+        // Culprit location:
+        UUID customerId = customer.getId();
 
         log.debug("Payment validated for customer {} with amount ${}", customerId, amount);
         return customerId != null || amount < 50.0;
