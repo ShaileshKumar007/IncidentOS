@@ -65,3 +65,11 @@ tasks.register('unitTest', Test) {
         events "passed", "skipped", "failed"
     }
 }
+
+// Dedicated task for starting the Spring Boot application
+tasks.register('runApp', JavaExec) {
+    description = 'Starts the checkout service Spring Boot application'
+    group = 'application'
+    mainClass = 'com.example.checkout.CheckoutApplication'
+    classpath = sourceSets.main.runtimeClasspath
+}

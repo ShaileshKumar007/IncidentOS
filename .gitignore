@@ -1,4 +1,107 @@
-.gradle/
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
 build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.venv/
+venv/
+ENV/
+env/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Java / Spring Boot
+demo-environment/target/
+demo-environment/build/
+demo-environment/.gradle/
+demo-environment/*.class
+*.class
+.mtj.tmp/
+
+# Package Files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Gradle Wrapper Exception (Must be tracked)
+!gradle-wrapper.jar
+!**/gradle/wrapper/gradle-wrapper.jar
+
+# Virtual environments & node
+node_modules/
+.npm/
+
+# Logs & Databases
 *.log
-logs/application.log
+/logs/
+*.sqlite
+*.sqlite3
+*.db
+
+# Diagnostic Log Fixture Exception (Must be tracked)
+!demo-environment/logs/application.jsonl
+!demo-environment/logs/error-traces.jsonl
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDEs & Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# Environment & Credentials
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.cert
+*.crt
+credentials.json
+secrets/
+
+# Switch & Agent local runtimes
+.switch/
+agent-sessions/
+
+# Agent Scratchpads & Temporary Workspaces
+scratch/
+tmp/
+.temp/
+
+# Nested demo repository
+demo-environment/.git/
