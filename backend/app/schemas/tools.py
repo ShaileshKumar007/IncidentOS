@@ -97,5 +97,8 @@ class TestRunResponse(BaseModel):
     tests_run: int
     tests_passed: int
     tests_failed: int
+    tests_skipped: int = 0
+    tests_found: Optional[int] = None
+    tests_aborted: int = 0
     output: str
     audit: ToolExecutionResult

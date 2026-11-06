@@ -98,9 +98,14 @@ All 5 agents are provisioned on the local Switch host machine with provider `ant
   "description": "...",
   "instructions": "...",
   "auto_mode": true,
-  "auto_approve": true
+  "auto_approve": false
 }
 ```
+
+> [!IMPORTANT]
+> **Difference Between `auto_mode` and `auto_approve`**:
+> - **`auto_mode: true`**: Enables autonomous turn-handling and inter-agent message consumption inside Switch rooms. Maps to ACP `sessionMode: "auto_edit"`, which auto-accepts file edits within workspace boundaries but retains strict approval gates for tool invocations and command execution.
+> - **`auto_approve: true`**: Bypass mode. Maps to ACP `sessionMode: "yolo"` (`full-access`), running **every** tool, shell command, and script without asking for permission. This completely dismantles least-privilege containment and is **strictly prohibited** for all IncidentOS agents.
 
 ---
 
@@ -110,6 +115,18 @@ All 5 agents are provisioned on the local Switch host machine with provider `ant
 - Direct agent delegation uses `send_targeted_message(body=..., target_names=["<agent-name>"])`.
 - Switch routes targeted messages directly into the agent session via ACP as an addressed turn.
 - In Mattermost channel `#incidents`, typing `@incident-commander ...` or using `!assign-agent @incident-commander` directs incoming messages to the Incident Commander.
+
+### Headless ACP Approval Deadlock & Gateway Feasibility (Milestone 4E.4.3)
+- **The Operational Deadlock**: Antigravity runs headless via `antigravity-acp`. When specialist agents (`log-investigator`, `code-investigator`, `qa-validator`) run inside unbridged internal Switch rooms (`incident-ops-bridge`), un-whitelisted tool invocations trigger interactive `request.opened` events. Because no human UI exists in unbridged rooms, these requests remain pending indefinitely, deadlocking the agent session turn and blocking subsequent messages.
+- **Evaluated Workaround (Automated Gateway)**: Milestone 4E.4.3 investigated deploying a local sidecar gateway connecting to Switch Gateway WebSocket (`ws://127.0.0.1:60462`) to programmatically approve allowlisted IncidentOS tools.
+- **Architectural Rejection (ADR-011)**:
+  - Switch 0.31.0 strips structured tool provenance (`toolName`, `mcpServer`, `agentId`, and structured arguments) from the `request.opened` event payload.
+  - The event exposes only human-facing UI display strings (`title` and truncated `detail`).
+  - Relying on title-string regex/matching is vulnerable to command description spoofing (an uncontained shell command could set its description to match an approved MCP tool).
+  - Consequently, automated title-parsing gateways are **rejected as unsafe**.
+- **Approved Operational Policy**:
+  - `auto_approve: false` remains mandatory across all agent configurations.
+  - Human review remains the sole authorization mechanism for non-autonomous operations.
 
 ### Human Approval Gate
 - **Headless ACP Limitation**: Antigravity runs headless via `antigravity-acp`. Native modal UI prompts are skipped/denied by design.

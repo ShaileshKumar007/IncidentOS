@@ -1,6 +1,7 @@
 from typing import Optional
 from fastapi import APIRouter, HTTPException, Query, status
 
+from app.logging_config import sanitize_paths
 from app.schemas.tools import (
     DeploymentSearchResponse,
     GitDiffResponse,
@@ -52,9 +53,9 @@ def api_search_logs(
             agent_id=agent_id,
         )
     except (PathTraversalError, SymlinkEscapeError, RestrictedPathError) as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=sanitize_paths(str(e)))
     except (InvalidInputError, FileSizeLimitExceededError) as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=sanitize_paths(str(e)))
 
 
 @router.get("/logs/{log_id}", response_model=LogRecord)
@@ -77,7 +78,7 @@ def api_get_log(
             )
         return record
     except (PathTraversalError, SymlinkEscapeError, RestrictedPathError) as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=sanitize_paths(str(e)))
 
 
 # ==============================================================================
@@ -124,9 +125,9 @@ def api_get_git_history(
             agent_id=agent_id,
         )
     except (PathTraversalError, SymlinkEscapeError, RestrictedPathError) as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=sanitize_paths(str(e)))
     except InvalidInputError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=sanitize_paths(str(e)))
 
 
 @router.get("/git/diff", response_model=GitDiffResponse)
@@ -147,9 +148,9 @@ def api_get_git_diff(
             agent_id=agent_id,
         )
     except (PathTraversalError, SymlinkEscapeError, RestrictedPathError) as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=sanitize_paths(str(e)))
     except InvalidInputError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=sanitize_paths(str(e)))
 
 
 # ==============================================================================
@@ -161,4 +162,4 @@ def api_run_tests(request: TestRunRequest) -> TestRunResponse:
     try:
         return run_tests(request=request)
     except InvalidInputError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=sanitize_paths(str(e)))

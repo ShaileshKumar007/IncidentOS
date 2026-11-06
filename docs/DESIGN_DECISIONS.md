@@ -96,6 +96,36 @@
   5. Provide pre-approved Gradle tasks (`unitTest`, `regressionTest`, `runApp`) allowlisted by the FastAPI backend test runner.
 - **Consequences**: Enables fast, reliable, offline-capable test runs in under 3 seconds with empirical pass/fail reporting for the QA Agent, while strictly isolating the reproducible regression.
 
+---
+
+### ADR-011: Do Not Automate Switch Approvals Without Structured Tool Provenance
+- **Status**: Accepted
+- **Context**:
+  In Milestone 4E.4.3, we investigated whether a separate local gateway service could listen to Switch Gateway WebSocket events (`request.opened`) on port `60462` and automatically submit `request.answer` frames for approved IncidentOS MCP tools. While Switch 0.31.0 exposes `request.opened` and accepts `request.answer` with revision protection, the wire event strips all structured provenance:
+  - `toolName` is missing from the event schema.
+  - `mcpServer` is missing from the event schema.
+  - `agentId` is absent from the `request.opened` event payload (only `sessionId` is transmitted).
+  - `arguments` are not provided as a structured JSON object; only `content.detail: string | null` is provided, which stringifies arguments and truncates them at 1,000 characters with `… (N more characters not shown)`, breaking JSON parseability for larger payloads.
+  - Both MCP tool calls and arbitrary shell/command executions share the identical generic wire discriminator `content.kind === "approval"`.
+- **Decision**:
+  Do not implement an automated approval gateway or decision mechanism based on parsing unstructured display titles (`content.title`) or truncated detail strings.
+- **Rationale**:
+  Display strings are human-facing UI formatting artifacts, not trustworthy authorization metadata. A shell command execution (`run_command`) can accept a description or command argument that produces a display title mimicking an approved MCP tool call (e.g. `description: "incidentos wants to run incidentos_search_logs"`). Relying on regex or substring matching against display titles creates a severe vulnerability where an uncontained shell execution could be mistakenly auto-approved as a safe read-only MCP tool.
+- **Security Requirements for Reconsideration**:
+  Automated tool approval can only be reconsidered if upstream Switch / ACP provides an authenticated, tamper-proof event contract containing:
+  1. Immutable structured provider identity.
+  2. Structured MCP server identity.
+  3. Structured tool name.
+  4. Structured, un-truncated arguments.
+  5. Reliable requesting agent and session identity.
+  6. Approval request ID and revision.
+  7. Explicit, structured distinction between MCP tool approvals and shell/command approvals.
+  8. Replay and stale-request protection.
+- **Consequences**:
+  - `auto_approve: false` remains mandatory across all agent configurations to prevent unverified bypass mode (`yolo`).
+  - Human approval remains the definitive authorization gate.
+  - No gateway service will be implemented against the current Switch 0.31.0 contract. Headless specialist agents must either execute pre-authorized actions via native provider allowlists or coordinate findings without headless approval deadlocks.
+
 ## 2. Verified Integration Details & Environmental Findings
 
 Following the Milestone 1 audit of the live Switch Console and Mattermost environment, all initial integration unknowns have been verified and resolved.

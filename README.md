@@ -69,6 +69,10 @@ flowchart TD
     end
 ```
 
+> [!NOTE]
+> **Tool Authorization & Switch Integration Boundary**:
+> Tool invocations enforce strict least privilege. In accordance with [ADR-011](docs/DESIGN_DECISIONS.md#adr-011-do-not-automate-switch-approvals-without-structured-tool-provenance), automated approval based on Switch display-title string matching is explicitly rejected because the Switch 0.31.0 wire event omits structured tool/server provenance, creating title-spoofing risks. All non-autonomous actions remain gated behind authenticated human review.
+
 ---
 
 ## 3. The Five Specialized Agents
@@ -121,12 +125,70 @@ IncidentOS is demonstrated using a fictional **e-commerce checkout service** (`c
 │   └── documentation/         # Documentation agent specification
 ├── backend/                   # IncidentOS Python/FastAPI backend & controlled tools
 ├── demo-environment/          # Fictional Java 21 / Spring Boot checkout service
+├── mcp-server/                # FastMCP stdio server exposing IncidentOS tools to agents
 └── switch/                    # Switch agent collaboration configuration & bindings
 ```
 
 ---
 
-## 6. Implementation Milestones
+## 6. Quickstart & Verification
+
+### Prerequisites
+- **Python**: `>=3.12`
+- **Java**: Java 21 (e.g. `openjdk@21` for checkout-service compilation and runner execution)
+- **Node.js**: Node 20+ (optional, for Switch Console runtime)
+
+### Installation
+Set up the Python environment and install both backend and FastMCP dependencies:
+
+```bash
+# 1. Create and activate virtual environment
+python3.12 -m venv backend/.venv
+source backend/.venv/bin/activate
+
+# 2. Install backend and test dependencies
+pip install -e "./backend[dev]"
+
+# 3. Install FastMCP server and dependencies
+pip install -e "./mcp-server[dev]"
+```
+
+### Environment Configuration
+Configure local credentials from the template:
+```bash
+cp .env.example backend/.env
+```
+Ensure `backend/.env` contains a secure random token for `INCIDENTOS_API_TOKEN` (e.g., `incidentos-dev-token-local`).
+> [!IMPORTANT]
+> Never commit `.env` or live credentials to version control. All `.env` files are excluded by `.gitignore`.
+
+### Running Verification Tests
+
+Run the full automated test suites:
+
+```bash
+# Execute backend tool & security test suite (79 tests)
+pytest backend/tests
+
+# Execute FastMCP tool & protocol test suite (20 tests)
+pytest mcp-server/tests
+```
+
+### Starting the Controlled Backend Tools Service
+
+Start the local sandboxed FastAPI service:
+```bash
+PYTHONPATH=backend uvicorn app.main:app --host 127.0.0.1 --port 8000 --env-file backend/.env
+```
+
+The service is available locally:
+- **Base API URL**: `http://127.0.0.1:8000`
+- **Health Check**: `http://127.0.0.1:8000/health`
+- **Interactive OpenAPI Docs**: `http://127.0.0.1:8000/docs`
+
+---
+
+## 7. Implementation Milestones
 
 1. **Milestone 1**: Multi-Agent Collaboration Foundation (Switch & Mattermost setup)
 2. **Milestone 2**: Establishing 5 Independent Agent Sessions
@@ -140,7 +202,7 @@ IncidentOS is demonstrated using a fictional **e-commerce checkout service** (`c
 
 ---
 
-## 7. Security & Engineering Rules
+## 8. Security & Engineering Rules
 
 - **Zero Hallucination**: Every assertion must link to verifiable logs, diffs, or test runs.
 - **Strict Role Boundaries**: Agents have isolated scopes and least-privilege toolsets.

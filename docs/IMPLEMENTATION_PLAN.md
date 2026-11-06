@@ -84,6 +84,12 @@ To maximize hackathon success and de-risk core platform integrations early, the 
   - Test runner endpoint executes Gradle/Maven and returns parsed JSON results.
 - **Risks**: Handling subprocess execution timeouts cleanly without hanging the backend.
 
+#### Milestone 4E.4.3: Automated Approval Gateway Evaluation (Evaluated & Rejected)
+- **Status**: Evaluated and Rejected for Switch 0.31.0.
+- **Outcome**: Technical investigation established that the Switch 0.31.0 `request.opened` wire event strips structured tool identifiers, MCP server names, and structured arguments, exposing only human-facing UI strings (`title` and truncated `detail`). Automating approvals by parsing display strings introduces critical security risks (e.g. command description spoofing bypassing shell execution blocks).
+- **Operational Limitation**: Headless ACP sessions invoking un-whitelisted tools trigger interactive `request.opened` events that deadlock in the absence of a human UI in unbridged rooms.
+- **Future Reconsideration**: Any automated approval gateway implementation is strictly deferred until upstream Switch or Antigravity ACP exposes verified, immutable, and structured approval metadata.
+
 ---
 
 ### Milestone 5: Evidence-Backed Root Cause Analysis Workflow

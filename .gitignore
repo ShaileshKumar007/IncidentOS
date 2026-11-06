@@ -60,6 +60,7 @@ node_modules/
 *.sqlite
 *.sqlite3
 *.db
+demo-environment/logs/*.gz
 
 # Diagnostic Log Fixture Exception (Must be tracked)
 !demo-environment/logs/application.jsonl
